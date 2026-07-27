@@ -12,14 +12,11 @@ def get_weather(city):
     weather_data = res_weather.json()
     temp = weather_data["main"]["temp"]
     description = weather_data["weather"][0]["description"]
-    return temp,description
-
-temp,description = get_weather("mumbai")
-print(temp,description)
+    return {"city": city, "temp": temp, "description": description}
 
 
 
-client = genai.Client()
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 weather_tool = {
     "type": "function",
@@ -38,12 +35,11 @@ weather_tool = {
 }
 
 available_functions = {
-    "get_weather": lambda city: {
-        "city": city, "temperature": "22", "unit": "celsius"
-    },
+    "get_weather": get_weather,
 }
 
-user_input = "What is the temperature in London?"
+
+user_input = input("Ask me anything: ")
 previous_id = None
 
 while True:
@@ -73,3 +69,4 @@ while True:
     previous_id = interaction.id
 
 print(interaction.output_text)
+

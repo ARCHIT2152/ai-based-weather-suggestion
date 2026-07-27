@@ -116,3 +116,6 @@ All credentials are loaded from a local `.env` file, which is explicitly exclude
 ## 📄 License
 
 This project is open-source and available for personal or educational use.
+
+
+![seuqence diagram](<_- visual selection (29)-1.png>)
