@@ -1,121 +1,362 @@
-# 🌤️ Weather AI Suggestion App
+# 🌦️ AI Weather Assistant using Google Gemini Function Calling
 
-A Python command-line application that combines real-time weather data with generative AI to deliver personalized, context-aware daily recommendations — covering clothing, hydration, and safety precautions.
+An AI-powered weather assistant built with **Python**, **Google Gemini**, and the **OpenWeatherMap API** that demonstrates **Function Calling (Tool Calling)**.
 
-This project demonstrates **API chaining**: using the structured output of one API (weather data) as the input to another (an LLM), enabling the model to reason over real-world data rather than generate generic responses.
+Instead of directly asking an LLM to answer weather questions, the application provides Gemini with a custom tool (`get_weather`). Whenever the model determines that external weather information is required, it automatically invokes the tool, retrieves live weather data, and uses the returned information to generate a natural language response.
 
----
-
-## ✨ Features
-
-- Fetches live weather conditions for any city worldwide via the OpenWeatherMap API
-- Uses Google's Gemini API to generate tailored, human-readable advice based on that data
-- Assigns the LLM a "Weather Data Analyst" persona for more structured, higher-quality responses
-- Secure credential handling — no API keys are ever hardcoded in source
+This project demonstrates how Large Language Models interact with external APIs through developer-defined functions.
 
 ---
 
-## 🛠️ Tech Stack
+# 🚀 Features
 
-| Component        | Technology                                   |
-|-------------------|-----------------------------------------------|
-| Language          | Python 3                                     |
-| Weather Data      | [OpenWeatherMap API](https://openweathermap.org/api) |
-| AI Reasoning      | [Google Gemini API](https://ai.google.dev/) (`google-genai`) |
-| Config Management | `python-dotenv`                              |
-| HTTP Requests     | `requests`                                   |
-
----
-
-## ⚙️ How It Works
-
-1. **Input** — User enters a city name
-2. **Fetch** — App sends a `GET` request to OpenWeatherMap and retrieves current temperature and conditions
-3. **Parse** — Relevant fields (temperature, weather description) are extracted from the JSON response
-4. **Prompt Construction** — These values are embedded into a structured prompt instructing Gemini to act as a Weather Data Analyst
-5. **Generate** — The prompt is sent to Gemini's API, which returns tailored suggestions
-6. **Output** — The AI-generated recommendations are printed to the console
-
-```
-City Name → OpenWeatherMap API → Extracted Weather Data → Gemini Prompt → AI-Generated Suggestions
-```
+- 🌍 Live weather information for any city
+- 🤖 Google Gemini Function Calling
+- 🔧 Dynamic tool execution
+- ☁️ OpenWeatherMap API integration
+- 🔐 Secure API key management using `.env`
+- 📦 Clean modular architecture
+- 🔄 Multi-turn conversation support
+- 📋 Structured JSON communication between Python and Gemini
 
 ---
 
-## 📦 Setup & Installation
+# 🛠️ Tech Stack
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/ARCHIT2152/your-repo-name.git
-cd your-repo-name
+| Component | Technology |
+|----------|------------|
+| Language | Python 3 |
+| AI Model | Google Gemini |
+| Weather API | OpenWeatherMap |
+| HTTP Requests | requests |
+| Environment Variables | python-dotenv |
+| Data Format | JSON |
+
+---
+
+# 📂 Project Structure
+
+```
+weather-api-project/
+│
+├── weather_tool.py        # Main application
+├── .env                   # API Keys
+├── .gitignore
+├── requirements.txt
+└── README.md
 ```
 
-### 2. Create and activate a virtual environment
-```bash
-python -m venv myenv
-myenv\Scripts\activate      # Windows
-source myenv/bin/activate   # macOS/Linux
+---
+
+# 🏗️ Project Architecture
+
+```
+                User
+                  │
+                  ▼
+        Python Application
+                  │
+                  ▼
+           Google Gemini
+                  │
+      Decides Function Call
+                  │
+                  ▼
+      available_functions
+                  │
+                  ▼
+       get_weather(city)
+                  │
+                  ▼
+      OpenWeatherMap API
+                  │
+          JSON Weather Data
+                  │
+                  ▼
+        Function Result
+                  │
+                  ▼
+           Google Gemini
+                  │
+                  ▼
+      Natural Language Response
+                  │
+                  ▼
+                 User
 ```
 
-### 3. Install dependencies
-```bash
-pip install requests google-genai python-dotenv
+---
+
+# ⚙️ Workflow
+
+### Step 1
+
+User asks a question.
+
+```
+What is the temperature in London?
 ```
 
-### 4. Configure environment variables
-Create a `.env` file in the project root:
+↓
+
+### Step 2
+
+Python sends the following to Gemini:
+
+- User Query
+- Tool Definition (`get_weather`)
+- Previous Conversation ID
+
+↓
+
+### Step 3
+
+Gemini analyzes the request.
+
+If weather information is required, it generates a **Function Call**.
+
+```
+get_weather(city="London")
+```
+
+↓
+
+### Step 4
+
+Python receives the function call.
+
+↓
+
+### Step 5
+
+Python looks up the requested function inside
+
+```
+available_functions
+```
+
+↓
+
+### Step 6
+
+`get_weather()` executes.
+
+It:
+
+- Builds the OpenWeatherMap URL
+- Sends an HTTP request
+- Receives JSON
+- Extracts temperature and weather description
+
+↓
+
+### Step 7
+
+Python packages the result into a Function Result.
+
+↓
+
+### Step 8
+
+Gemini receives the function output.
+
+↓
+
+### Step 9
+
+Gemini generates a natural language answer.
+
+↓
+
+### Step 10
+
+The answer is displayed to the user.
+
+---
+
+# 🔄 Sequence Flow
+
+```
+User
+ │
+ │ Ask Weather
+ ▼
+Python Application
+ │
+ │ Prompt + Tool Definition
+ ▼
+Gemini API
+ │
+ │ Function Call
+ ▼
+available_functions
+ │
+ │
+ ▼
+get_weather()
+ │
+ │ HTTP GET
+ ▼
+OpenWeatherMap API
+ │
+ │ JSON
+ ▲
+ │
+get_weather()
+ │
+ │ Function Result
+ ▼
+Gemini API
+ │
+ │ Natural Language Response
+ ▼
+Python Application
+ │
+ ▼
+User
+```
+
+---
+
+# 🔑 Environment Variables
+
+Create a `.env` file in the project root.
+
 ```env
 WEATHER_API_KEY=your_openweathermap_api_key
 GEMINI_API_KEY=your_gemini_api_key
 ```
-- Get a free OpenWeatherMap key: https://openweathermap.org/api
-- Get a free Gemini API key: https://ai.google.dev/
 
-### 5. Run the application
+---
+
+# 📦 Installation
+
+Clone the repository
+
 ```bash
-python index.py
+git clone https://github.com/ARCHIT2152/weather-api-project.git
+```
+
+Move into the project
+
+```bash
+cd weather-api-project
+```
+
+Create a virtual environment
+
+```bash
+python -m venv myenv
+```
+
+Activate it
+
+Windows
+
+```bash
+myenv\Scripts\activate
+```
+
+Linux / macOS
+
+```bash
+source myenv/bin/activate
+```
+
+Install dependencies
+
+```bash
+pip install -r requirements.txt
 ```
 
 ---
 
-## 💡 Example Usage
+# ▶️ Run
 
-```
-enter city: Delhi
-
-As a Weather Data Analyst, here's what today's conditions mean for you:
-
-At 34.6°C with overcast clouds, high humidity is the key factor —
-expect it to feel warmer than the actual temperature suggests.
-
-1. Outfit Suggestions: Opt for breathable cotton or linen, loose-fitting
-   clothing, and avoid synthetic fabrics that trap moisture.
-2. Hydration & Diet: Drink at least 3L of water; include electrolyte-rich
-   options like coconut water or buttermilk.
-3. Precautions: Apply SPF even under cloud cover, and carry a compact
-   umbrella — overcast heat can trigger sudden showers.
+```bash
+python weather_tool.py
 ```
 
+Example
+
+```
+Ask me anything:
+What is the weather in Mumbai?
+```
+
+Output
+
+```
+Called get_weather({'city': 'Mumbai'})
+```
+
+Gemini
+
+```
+The current temperature in Mumbai is 29°C with scattered clouds.
+```
+
 ---
 
-## 🔒 Security
+# 📖 Concepts Demonstrated
 
-All credentials are loaded from a local `.env` file, which is explicitly excluded via `.gitignore`. No API keys are ever committed to version control or hardcoded in source files.
+- Google Gemini Function Calling
+- AI Tool Calling
+- Function Registry Pattern
+- Dynamic Function Dispatch
+- REST API Integration
+- HTTP Requests
+- Environment Variables
+- JSON Serialization
+- Multi-turn AI Conversations
 
 ---
 
-## 🚀 Future Improvements
+# 📚 APIs Used
 
-- [ ] Add error handling for invalid city names or failed API requests
-- [ ] Support concurrent lookups for multiple cities using `asyncio`
-- [ ] Deploy as a simple web app or Telegram bot
-- [ ] Cache recent responses to reduce redundant API calls
+## Google Gemini API
+
+Responsible for:
+
+- Understanding user queries
+- Deciding when tools should be called
+- Generating natural language responses
 
 ---
 
-## 📄 License
+## OpenWeatherMap API
 
-This project is open-source and available for personal or educational use.
+Provides:
 
+- Current Temperature
+- Weather Description
+- City Information
 
-![seuqence diagram](<_- visual selection (29)-1.png>)
+---
+
+# 🚀 Future Improvements
+
+- [ ] 5-Day Weather Forecast
+- [ ] Humidity & Wind Speed
+- [ ] Air Quality Index
+- [ ] Weather Alerts
+- [ ] Multiple AI Tools (News, Time, Currency)
+- [ ] Streamlit Dashboard
+- [ ] Voice Assistant
+- [ ] Location Detection
+- [ ] Unit Conversion (°C ↔ °F)
+- [ ] Error handling for invalid cities
+
+---
+
+# 👨‍💻 Author
+
+**Archit Bankey**
+
+B.Tech Computer Science Engineering
+
+Interested in Artificial Intelligence, Machine Learning, LLMs, AI Agents, and Backend Development.
+
+---
+
+## ⭐ Star this repository if you found it useful!
