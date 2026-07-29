@@ -33,9 +33,47 @@ weather_tool = {
         "required": ["city"],
     },
 }
+def temp_convertor(temp, from_unit, to_unit):
+    from_unit = from_unit.lower()
+    to_unit = to_unit.lower()
 
+    if from_unit == to_unit:
+        return temp
+
+    if from_unit == "celsius" and to_unit == "fahrenheit":
+        return (temp * 9/5) + 32
+    elif from_unit == "fahrenheit" and to_unit == "celsius":
+        return (temp - 32) * 5/9
+    else:
+        raise ValueError(f"Unsupported conversion: {from_unit} -> {to_unit}")
+
+
+convertor = {
+    "type": "function",
+    "name": "temp_convertor",
+    "description": "Converts a temperature value between Celsius and Fahrenheit.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "temp": {
+                "type": "number",
+                "description": "The temperature value to convert.",
+            },
+            "from_unit": {
+                "type": "string",
+                "description": "Unit of the input temperature. Must be 'celsius' or 'fahrenheit'.",
+            },
+            "to_unit": {
+                "type": "string",
+                "description": "Target unit to convert to. Must be 'celsius' or 'fahrenheit'.",
+            },
+        },
+        "required": ["temp", "from_unit", "to_unit"],
+    },
+}
 available_functions = {
     "get_weather": get_weather,
+    "temp_convertor" : temp_convertor,
 }
 
 
@@ -46,7 +84,7 @@ while True:
     interaction = client.interactions.create(
         model="gemini-3.5-flash",
         input=user_input,
-        tools=[weather_tool],
+        tools=[weather_tool,convertor],
         previous_interaction_id=previous_id,
     )
 
@@ -69,4 +107,3 @@ while True:
     previous_id = interaction.id
 
 print(interaction.output_text)
-
